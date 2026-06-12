@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Category } from './category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ERROR_CATEGORY_NOT_FOUND, ERROR_CATEGORY_ALREADY_EXISTS, ERROR_CATEGORY_HAS_TRANSACTIONS } from '../constants';
 
 @Injectable()
 export class CategoriesService {
@@ -16,7 +17,7 @@ export class CategoriesService {
     const allCategories = await this.repo.find();
     for (let i = 0; i < allCategories.length; i++) {
       if (allCategories[i].name === dto.name) {
-        throw new ConflictException('Category already exists');
+        throw new ConflictException(ERROR_CATEGORY_ALREADY_EXISTS);
       }
     }
     const newCategory = new Category();
@@ -57,7 +58,7 @@ export class CategoriesService {
   async findOne(id: string) {
     const category = await this.repo.findOne({ where: { id: id } });
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException(ERROR_CATEGORY_NOT_FOUND);
     }
     return category;
   }
@@ -78,7 +79,7 @@ export class CategoriesService {
     try {
       await this.repo.remove(category);
     } catch (error) {
-      throw new ConflictException('Cannot delete category with existing transactions');
+      throw new ConflictException(ERROR_CATEGORY_HAS_TRANSACTIONS);
     }
   }
 }

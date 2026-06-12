@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { QueryTransactionDto } from './dto/query-transaction.dto';
 
 @Controller('transactions')
 export class TransactionsController{
@@ -12,15 +13,8 @@ export class TransactionsController{
     return this.transactionService.create(createDto);
   }
   @Get()
-  findAll( @Query('page') page?: string, @Query('limit') limit?: string, @Query('type') type?: string,
-    @Query('categoryId') categoryId?: string, @Query('dateFrom') dateFrom?: string, @Query('dateTo') dateTo?: string,
-    @Query('search') search?: string, @Query('sortBy') sortBy?: string,  @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
-  ){
-    const pageNum = page ? parseInt(page) : 1;
-    const limitNum = limit ? parseInt(limit) : 20;
-    const sortByField = sortBy || 'date';
-    const sortOrderValue = sortOrder || 'DESC';
-    return this.transactionService.findAll(pageNum,limitNum, type, categoryId, dateFrom, dateTo, search, sortByField,  sortOrderValue, );
+  findAll(@Query() query: QueryTransactionDto) {
+    return this.transactionService.findAll(query);
   }
   @Get(':id')
   findOne(@Param('id') id:string){
