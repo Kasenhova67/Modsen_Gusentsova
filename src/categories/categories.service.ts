@@ -27,34 +27,54 @@ export class CategoriesService {
     return await this.repo.save(newCategory);
   }
 
-  async findAll(page: number = 1, limit: number = 20, search: string = '') {
+  async findAll(
+    page: number = 1,
+    limit: number = 20,
+    search: string = '',
+    sortBy: string = 'name',
+    sortOrder: 'ASC' | 'DESC' = 'ASC' ,
+  ){
     let allCategories = await this.repo.find();
-    if (search !== '') {
-      const filtered = [];
-      for (let i = 0; i < allCategories.length; i++) {
+
+    if(search != ''){
+      const filter = [];
+      for(let i = 0; i < allCategories.length; i++){
         const name = allCategories[i].name.toLowerCase();
-        const searchTerm = search.toLowerCase();
-        if (name.includes(searchTerm)) {
-          filtered.push(allCategories[i]);
+        const searchName = name.toLowerCase();
+        if( name.includes(searchName)){
+          filter.push(allCategories[i]);
         }
       }
-      allCategories = filtered;
+      allCategories = filter;
     }
-    allCategories.sort(function(a, b) {
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
+    allCategories.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+      if( sortBy === 'cretedAt'){
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      }
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }      
+      if (sortOrder === 'ASC') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
     });
+
     const totalCount = allCategories.length;
     const startIndex = (page - 1) * limit;
     const data = [];
     for (let i = startIndex; i < startIndex + limit && i < allCategories.length; i++) {
       data.push(allCategories[i]);
     }
-
-    return {data: data, total: totalCount, page: page, limit: limit, totalPages: Math.ceil(totalCount / limit), };
+    
+    return { data, total: totalCount, page, limit, totalPages: Math.ceil(totalCount / limit) };
   }
-
+    
   async findOne(id: string) {
     const category = await this.repo.findOne({ where: { id: id } });
     if (!category) {
