@@ -61,10 +61,6 @@ export class TransactionsService {
                 }
             }
         }
-
-// поиск и сортировка сделать
-
-
         let totalCount = allTransactions.length;
         const startIndex =(page - 1)*limit;
         const data = [];
@@ -81,8 +77,6 @@ export class TransactionsService {
         }
         return transaction;
     }
-// сделать сводку
-
     async remove( id:string){
         const transaction = await this.findOne(id);
         return await this.transactionRepository.remove(transaction);

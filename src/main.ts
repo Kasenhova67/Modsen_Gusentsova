@@ -2,15 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SWAGGER_TITLE, SWAGGER_DESCRIPTION, SWAGGER_VERSION, SWAGGER_PATH, PORT } from './constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-  
-  const config = new DocumentBuilder().build();
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+
+  const config = new DocumentBuilder()
+    .setTitle(SWAGGER_TITLE)
+    .setDescription(SWAGGER_DESCRIPTION)
+    .setVersion(SWAGGER_VERSION)
+    .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-  await app.listen(3000);
-  console.log('Сервер запущен на http://localhost:3000');
+  SwaggerModule.setup(SWAGGER_PATH, app, document);
+
+  await app.listen(PORT);
+  console.log(`Server on http://localhost:${PORT}`);
+  console.log(`Swagger on http://localhost:${PORT}/${SWAGGER_PATH}`);
 }
 bootstrap();

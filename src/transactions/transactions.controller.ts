@@ -26,19 +26,12 @@ export class TransactionsController{
   findOne(@Param('id') id:string){
     return this.transactionService.findOne(id);
   }
-  // @Get('summary')                                      ????????????????????
-  // getSummary(
-  //   @Query('dateFrom') dateFrom?: string,
-  //   @Query('dateTo') dateTo?: string,
-  // ) {
-  //   return this.transactionService.getSummary(dateFrom, dateTo);
-  // }
   @Delete(':id')
   remove(@Param ('id') id: string){
     return this.transactionService.remove(id);
   }
   @Patch(':id')
-  update(@Param(':id') id: string, @Body() updateDto: UpdateTransactionDto){
+  update(@Param('id') id: string, @Body() updateDto: UpdateTransactionDto){
     return this.transactionService.update(id,updateDto);
   }
 }
