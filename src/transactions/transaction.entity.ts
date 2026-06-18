@@ -5,28 +5,28 @@ export type TransactionType = 'expense' | 'income';
 
 @Entity()
 export class Transaction {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
   private _id: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ name: 'amount', type: 'decimal', precision: 10, scale: 2 })
   private _amount: number;
 
-  @Column({ type: 'varchar' })
+  @Column({ name: 'type', type: 'varchar' })
   private _type: TransactionType;
 
-  @Column({ nullable: true })
+  @Column({ name: 'description', nullable: true })
   private _description: string;
 
-  @Column({ type: 'date' })
+  @Column({ name: 'date', type: 'date' })
   private _date: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'createdAt' })
   private _createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updatedAt' })
   private _updatedAt: Date;
 
-  @Column()
+  @Column({ name: 'categoryId' })
   private _categoryId: string;
 
   @ManyToOne(() => Category, { onDelete: 'RESTRICT' })

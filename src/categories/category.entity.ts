@@ -1,20 +1,22 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { OneToMany } from 'typeorm';
+import { Transaction } from '../transactions/transaction.entity';
 
 @Entity()
 export class Category {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
   private _id: string;
 
-  @Column({ unique: true })
+  @Column({ name: 'name', unique: true })
   private _name: string;
 
-  @Column()
+  @Column({ name: 'color' })
   private _color: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'createdAt' })
   private _createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updatedAt' })
   private _updatedAt: Date;
 
   get id(): string { return this._id; }
@@ -43,4 +45,7 @@ export class Category {
     }
     this._color = newColor;
   }
+
+  @OneToMany(() => Transaction, (transaction) => transaction.category)
+  transactions: Transaction[];
 }

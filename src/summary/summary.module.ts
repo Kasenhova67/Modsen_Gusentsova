@@ -1,11 +1,12 @@
-import { TransactionsModule } from "../transactions/transactions.module";
-import { Module } from "@nestjs/common";
-import { SummaryController } from "./summary.controller";
-import { SummaryService } from "./summary.service";
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SummaryController } from './summary.controller';
+import { SummaryService } from './summary.service';
+import { Transaction } from '../transactions/transaction.entity';
 
-@Module( {
-    imports: [TransactionsModule],
-    controllers:[ SummaryController],
-    providers: [SummaryService],
+@Module({
+  imports: [ TypeOrmModule.forFeature([Transaction]),  ],
+  controllers: [SummaryController],
+  providers: [SummaryService],
 })
-export class SummaryModule{}
+export class SummaryModule {}

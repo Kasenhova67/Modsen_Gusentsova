@@ -63,7 +63,11 @@ export class TransactionsService {
   }
 
   async findOne(id: string) {
-    const transaction = await this.transactionRepository.findOne({ where: { id } });
+    const transaction = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .where('transaction._id = :id', { id })
+      .getOne();
+    
     if (!transaction) {
       throw new NotFoundException(ERROR_TRANSACTION_NOT_FOUND);
     }

@@ -15,7 +15,11 @@ export class CategoriesService {
   ) {}
 
   async create(dto: CreateCategoryDto) {
-    const exists = await this.repo.findOne({ where: { name: dto.name } });
+    const exists = await this.repo
+      .createQueryBuilder('category')
+      .where('category._name = :name', { name: dto.name })
+      .getOne();
+    
     if (exists) {
       throw new ConflictException(ERROR_CATEGORY_ALREADY_EXISTS);
     }
@@ -37,7 +41,11 @@ export class CategoriesService {
   }
 
   async findOne(id: string) {
-    const category = await this.repo.findOne({ where: { id } });
+    const category = await this.repo
+      .createQueryBuilder('category')
+      .where('category._id = :id', { id })
+      .getOne();
+    
     if (!category) {
       throw new NotFoundException(ERROR_CATEGORY_NOT_FOUND);
     }
