@@ -14,11 +14,11 @@ import { Transaction } from './transactions/transaction.entity';
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        url: config.get('DATABASE_URL'), 
+        url: config.get('DATABASE_URL'),
         entities: [Category, Transaction],
         synchronize: true,
         ssl: {
-          rejectUnauthorized: false, 
+          rejectUnauthorized: false,
         },
       }),
       inject: [ConfigService],
