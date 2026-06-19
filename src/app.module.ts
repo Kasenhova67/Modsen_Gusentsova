@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
 import { TransactionsModule } from './transactions/transactions.module';
-import { SummaryModule } from './summary/summary.module';
 import { Category } from './categories/category.entity';
 import { Transaction } from './transactions/transaction.entity';
+import { SummaryModule } from './summary/summary.module';
 
 @Module({
   imports: [
@@ -14,12 +14,12 @@ import { Transaction } from './transactions/transaction.entity';
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        url: config.get('DATABASE_URL'), 
+        host: config.get('DB_HOST'),
+        port: config.get('DB_PORT'),
+        username: config.get('DB_USER'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_NAME'),
         entities: [Category, Transaction],
-        synchronize: true,
-        ssl: {
-          rejectUnauthorized: false, 
-        },
       }),
       inject: [ConfigService],
     }),
