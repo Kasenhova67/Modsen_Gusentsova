@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
@@ -20,6 +20,8 @@ import { SummaryModule } from './summary/summary.module';
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_NAME'),
         entities: [Category, Transaction],
+        synchronize: config.get('NODE_ENV') !== 'production',
+        ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: true } : false,
       }),
       inject: [ConfigService],
     }),

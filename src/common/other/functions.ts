@@ -10,27 +10,27 @@ export function filterBySearch<T>(
   );
 }
 
-export function sortByField<T extends Record<string, any>>(
+export function sortByField<T>(
   items: T[],
   sortBy: keyof T,
   sortOrder: 'ASC' | 'DESC' = 'ASC'
 ): T[] {
   return [...items].sort((a, b) => {
     const aValue = a[sortBy];
-    const bValue = b[sortBy];
+    const bValue = b[sortBy];    
     if (sortBy === 'createdAt' || sortBy === 'updatedAt' || sortBy === 'date') {
       const aDate = new Date(aValue as string).getTime();
       const bDate = new Date(bValue as string).getTime();
       return sortOrder === 'ASC' ? aDate - bDate : bDate - aDate;
-    }
+    }    
     if (typeof aValue === 'number' && typeof bValue === 'number') {
       return sortOrder === 'ASC' ? aValue - bValue : bValue - aValue;
-    }
+    }    
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       return sortOrder === 'ASC'
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue);
-    }
+    }    
     return 0;
   });
 }

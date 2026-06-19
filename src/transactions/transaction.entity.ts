@@ -1,47 +1,42 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Category } from '../categories/category.entity';
+import { BadRequestException } from '@nestjs/common';
+import { ERROR_DATE_IN_FUTURE, ERROR_AMOUNT_POSITIVE, ERROR_TYPE_INVALID } from '../constants';
 
-export type TransactionType = 'expense' | 'income';
+export enum TransactionType {
+  EXPENSE = 'expense',
+  INCOME = 'income',
+}
 
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
-  private _id: string;
+  id: string;
 
   @Column({ name: 'amount', type: 'decimal', precision: 10, scale: 2 })
-  private _amount: number;
+  amount: number;
 
   @Column({ name: 'type', type: 'varchar' })
-  private _type: TransactionType;
+  type: TransactionType;
 
   @Column({ name: 'description', nullable: true })
-  private _description: string;
+  description: string;
 
   @Column({ name: 'date', type: 'date' })
-  private _date: string;
+  date: string;
 
   @CreateDateColumn({ name: 'createdAt' })
-  private _createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({ name: 'updatedAt' })
-  private _updatedAt: Date;
+  updatedAt: Date;
 
   @Column({ name: 'categoryId' })
-  private _categoryId: string;
+  categoryId: string;
 
   @ManyToOne(() => Category, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'categoryId' })
-  private _category: Category;
-
-  get id(): string { return this._id; }
-  get amount(): number { return Number(this._amount); }
-  get type(): TransactionType { return this._type; }
-  get description(): string { return this._description; }
-  get date(): string { return this._date; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
-  get categoryId(): string { return this._categoryId; }
-  get category(): Category { return this._category; }
+  category: Category;
 
   static create(
     amount: number,
@@ -51,42 +46,42 @@ export class Transaction {
     description?: string,
   ): Transaction {
     const transaction = new Transaction();
-    transaction._amount = amount;
-    transaction._type = type;
-    transaction._categoryId = categoryId;
-    transaction._date = date;
-    transaction._description = description || '';
+    transaction.amount = amount;
+    transaction.type = type;
+    transaction.categoryId = categoryId;
+    transaction.date = date;
+    transaction.description = description || '';
     return transaction;
   }
 
   updateAmount(newAmount: number): void {
     if (newAmount <= 0) {
-      throw new Error('Amount must be positive');
+      throw new BadRequestException(ERROR_AMOUNT_POSITIVE);
     }
-    this._amount = newAmount;
+    this.amount = newAmount;
   }
 
   updateDate(newDate: string): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (new Date(newDate) > today) {
-      throw new Error('Date cannot be in the future');
+      throw new BadRequestException(ERROR_DATE_IN_FUTURE);
     }
-    this._date = newDate;
+    this.date = newDate;
   }
 
   updateDescription(newDescription: string): void {
-    this._description = newDescription;
+    this.description = newDescription;
   }
 
   updateCategoryId(newCategoryId: string): void {
-    this._categoryId = newCategoryId;
+    this.categoryId = newCategoryId;
   }
 
   updateType(newType: TransactionType): void {
-    if (!['expense', 'income'].includes(newType)) {
-      throw new Error('Type must be "expense" or "income"');
+    if (!Object.values(TransactionType).includes(newType)) {
+      throw new BadRequestException(ERROR_TYPE_INVALID);
     }
-    this._type = newType;
+    this.type = newType;
   }
 }

@@ -17,16 +17,19 @@ export class TransactionsService {
     private categoriesService: CategoriesService,
   ) {}
 
-  async create(createDto: CreateTransactionDto) {
-    await this.categoriesService.findOne(createDto.categoryId);
-
+  private validateDate(date: string): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (new Date(createDto.date) > today) {
+    if (new Date(date) > today) {
       throw new BadRequestException(ERROR_DATE_IN_FUTURE);
     }
+  }
 
-    const newTransaction = Transaction.create(
+  async create(createDto: CreateTransactionDto) {
+    await this.categoriesService.findOne(createDto.categoryId);
+    this.validateDate(createDto.date);
+
+    const transaction = Transaction.create(
       createDto.amount,
       createDto.type as TransactionType,
       createDto.categoryId,
@@ -34,7 +37,7 @@ export class TransactionsService {
       createDto.description,
     );
 
-    return await this.transactionRepository.save(newTransaction);
+    return await this.transactionRepository.save(transaction);
   }
 
   async findAll(query: QueryTransactionDto) {
@@ -63,11 +66,7 @@ export class TransactionsService {
   }
 
   async findOne(id: string) {
-    const transaction = await this.transactionRepository
-      .createQueryBuilder('transaction')
-      .where('transaction._id = :id', { id })
-      .getOne();
-    
+    const transaction = await this.transactionRepository.findOne({ where: { id } });
     if (!transaction) {
       throw new NotFoundException(ERROR_TRANSACTION_NOT_FOUND);
     }
@@ -100,47 +99,5 @@ export class TransactionsService {
     }
 
     return await this.transactionRepository.save(transaction);
-  }
-
-  async getSummary(dateFrom?: string, dateTo?: string) {
-    const qb = this.transactionRepository.createQueryBuilder('t');
-
-    if (dateFrom) {
-      qb.andWhere('t.date >= :dateFrom', { dateFrom });
-    }
-    if (dateTo) {
-      qb.andWhere('t.date <= :dateTo', { dateTo });
-    }
-
-    const transactions = await qb.getMany();
-
-    let totalIncome = 0;
-    let totalExpense = 0;
-
-    for (const transaction of transactions) {
-      const amount = Number(transaction.amount);
-      if (transaction.type === 'income') {
-        totalIncome += amount;
-      } else {
-        totalExpense += amount;
-      }
-    }
-
-    let periodFrom = dateFrom;
-    let periodTo = dateTo;
-    if (!periodFrom && !periodTo) {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      periodFrom = new Date(year, month, 1).toISOString().split('T')[0];
-      periodTo = new Date(year, month + 1, 0).toISOString().split('T')[0];
-    }
-
-    return {
-      period: { from: periodFrom, to: periodTo },
-      totalIncome,
-      totalExpense,
-      balance: totalIncome - totalExpense,
-    };
   }
 }

@@ -12,3 +12,10 @@ export const ERROR_DATE_IN_FUTURE = 'Date cannot be in the future';
 export const ERROR_VALIDATION_FAILED = 'Validation failed';
 export const ERROR_INTERNAL = 'Internal server error';
 export const ERROR_INTERNAL_TITLE = 'Internal Server Error';
+
+export const ERROR_NAME_LENGTH = 'Name must be between 2 and 50 characters';
+export const ERROR_INVALID_COLOR = 'Color must be in HEX format (#RRGGBB)';
+export const ERROR_AMOUNT_POSITIVE = 'Amount must be positive';
+export const ERROR_TYPE_INVALID = 'Type must be "expense" or "income"';
+export const ERROR_INVALID_UUID = 'Invalid ID format. Must be a valid UUID.';
+export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
