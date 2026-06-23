@@ -6,6 +6,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { Category } from './categories/category.entity';
 import { Transaction } from './transactions/transaction.entity';
 import { SummaryModule } from './summary/summary.module';
+import {StatisticsModule} from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SummaryModule } from './summary/summary.module';
     CategoriesModule,
     TransactionsModule,
     SummaryModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}
