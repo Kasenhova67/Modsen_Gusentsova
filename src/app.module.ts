@@ -1,21 +1,33 @@
-import { Module } from '@nestjs/common';
+ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
+import { TransactionsModule } from './transactions/transactions.module';
 import { Category } from './categories/category.entity';
+import { Transaction } from './transactions/transaction.entity';
+import { SummaryModule } from './summary/summary.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',      
-      password: 'kasenhiva_89123',
-      database: 'expense_tracker',
-      entities: [Category],
-      synchronize: true,
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get('DB_HOST'),
+        port: config.get('DB_PORT'),
+        username: config.get('DB_USER'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_NAME'),
+        entities: [Category, Transaction],
+        synchronize: config.get('NODE_ENV') !== 'production',
+        ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: true } : false,
+      }),
+      inject: [ConfigService],
     }),
     CategoriesModule,
+    TransactionsModule,
+    SummaryModule,
   ],
 })
 export class AppModule {}

@@ -17,13 +17,16 @@ export class CategoriesController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('search') search?: string,
+    @Query('sortBy') sortBy?: string,     
+    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',  
   ) {
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 20;
     const searchStr = search || '';
-    return this.service.findAll(pageNum, limitNum, searchStr);
+    const sortByField = sortBy || 'name';       
+    const sortOrderValue = sortOrder || 'ASC';   
+    return this.service.findAll(pageNum, limitNum, searchStr, sortByField, sortOrderValue);
   }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import {  ERROR_CATEGORY_NOT_FOUND, ERROR_CATEGORY_ALREADY_EXISTS, ERROR_CATEGORY_HAS_TRANSACTIONS,ERROR_INVALID_UUID,ERROR_INVALID_COLOR,} from '../constants';
+import { filterBySearch, sortByField, paginate } from '../common/other/functions';
 
 @Injectable()
 export class CategoriesService {
@@ -12,52 +14,41 @@ export class CategoriesService {
     private repo: Repository<Category>,
   ) {}
 
-  async create(dto: CreateCategoryDto) {
-    const allCategories = await this.repo.find();
-    for (let i = 0; i < allCategories.length; i++) {
-      if (allCategories[i].name === dto.name) {
-        throw new ConflictException('Category already exists');
-      }
-    }
-    const newCategory = new Category();
-    newCategory.name = dto.name;
-    newCategory.color = dto.color;
-
-    return await this.repo.save(newCategory);
+  private isValidUUID(id: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
   }
 
-  async findAll(page: number = 1, limit: number = 20, search: string = '') {
-    let allCategories = await this.repo.find();
-    if (search !== '') {
-      const filtered = [];
-      for (let i = 0; i < allCategories.length; i++) {
-        const name = allCategories[i].name.toLowerCase();
-        const searchTerm = search.toLowerCase();
-        if (name.includes(searchTerm)) {
-          filtered.push(allCategories[i]);
-        }
-      }
-      allCategories = filtered;
+  async create(dto: CreateCategoryDto) {
+    const exists = await this.repo.findOne({ where: { name: dto.name } });
+    if (exists) {
+      throw new ConflictException(ERROR_CATEGORY_ALREADY_EXISTS);
     }
-    allCategories.sort(function(a, b) {
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
-    });
-    const totalCount = allCategories.length;
-    const startIndex = (page - 1) * limit;
-    const data = [];
-    for (let i = startIndex; i < startIndex + limit && i < allCategories.length; i++) {
-      data.push(allCategories[i]);
-    }
+    const category = Category.create(dto.name, dto.color);
+    return await this.repo.save(category);
+  }
 
-    return {data: data, total: totalCount, page: page, limit: limit, totalPages: Math.ceil(totalCount / limit), };
+  async findAll(
+    page: number = 1,
+    limit: number = 20,
+    search: string = '',
+    sortBy: string = 'name',
+    sortOrder: 'ASC' | 'DESC' = 'ASC',
+  ) {
+    let categories = await this.repo.find();
+    categories = filterBySearch(categories, search, c => c.name);
+    categories = sortByField(categories, sortBy as keyof Category, sortOrder);
+    return paginate(categories, page, limit);
   }
 
   async findOne(id: string) {
-    const category = await this.repo.findOne({ where: { id: id } });
+    if (!this.isValidUUID(id)) {
+      throw new BadRequestException(ERROR_INVALID_UUID); 
+    }
+    
+    const category = await this.repo.findOne({ where: { id } });
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException(ERROR_CATEGORY_NOT_FOUND);
     }
     return category;
   }
@@ -65,20 +56,20 @@ export class CategoriesService {
   async update(id: string, dto: UpdateCategoryDto) {
     const category = await this.findOne(id);
     if (dto.name !== undefined) {
-      category.name = dto.name;
+      category.updateName(dto.name);
     }
     if (dto.color !== undefined) {
-      category.color = dto.color;
+      category.updateColor(dto.color);
     }
     return await this.repo.save(category);
   }
 
   async remove(id: string) {
-    const category = await this.findOne(id);    
+    const category = await this.findOne(id);
     try {
       await this.repo.remove(category);
-    } catch (error) {
-      throw new ConflictException('Cannot delete category with existing transactions');
+    } catch {
+      throw new ConflictException(ERROR_CATEGORY_HAS_TRANSACTIONS);
     }
   }
 }
