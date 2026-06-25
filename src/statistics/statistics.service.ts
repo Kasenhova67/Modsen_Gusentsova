@@ -25,6 +25,26 @@ export class StatisticsService{
     }
 
     async getTopCategories(query: TopCategoriesDto) {
-  
+        const {dateFrom, dateTo} = query;
+        const qb = this.transactionRepo
+            .createQueryBuilder('t')
+            .leftJoinAndSelect('t.category', 'c')
+            .select('c.id', 'id')
+            .addSelect('c.name', 'name')
+            .addSelect('SUM(t.amount)', 'total')
+            .where('t.type = :type', { type: 'expense' });
+
+        if (dateFrom && dateTo) {
+            qb.andWhere('t.date >= :dateFrom', { dateFrom })
+            .andWhere('t.date <= :dateTo', { dateTo });
+        }
+
+        qb.groupBy('c.id')
+            .addGroupBy('c.name')
+            .orderBy('SUM(t.amount)', 'DESC')
+            .limit(5);
+
+        const result = await qb.getRawMany();
+        return result;
     }
 }
