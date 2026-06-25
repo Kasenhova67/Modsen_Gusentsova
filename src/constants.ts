@@ -19,3 +19,7 @@ export const ERROR_AMOUNT_POSITIVE = 'Amount must be positive';
 export const ERROR_TYPE_INVALID = 'Type must be "expense" or "income"';
 export const ERROR_INVALID_UUID = 'Invalid ID format. Must be a valid UUID.';
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+export const ERROR_STATISTICS_NO_DATA = 'No data found for the specified period';
+export const ERROR_STATISTICS_INVALID_DATE = 'Invalid date format. Use YYYY-MM-DD';
+export const ERROR_STATISTICS_INVALID_TYPE = 'Type must be expense, income, or all';
