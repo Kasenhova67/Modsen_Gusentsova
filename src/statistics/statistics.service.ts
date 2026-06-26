@@ -25,26 +25,41 @@ export class StatisticsService{
     }
 
     async getTopCategories(query: TopCategoriesDto) {
-        const {dateFrom, dateTo} = query;
+        const { dateFrom, dateTo } = query;
+        const { startDate, endDate } = this.getDateRange(dateFrom, dateTo);
         const qb = this.transactionRepo
             .createQueryBuilder('t')
             .leftJoinAndSelect('t.category', 'c')
             .select('c.id', 'id')
             .addSelect('c.name', 'name')
             .addSelect('SUM(t.amount)', 'total')
-            .where('t.type = :type', { type: 'expense' });
-
-        if (dateFrom && dateTo) {
-            qb.andWhere('t.date >= :dateFrom', { dateFrom })
-            .andWhere('t.date <= :dateTo', { dateTo });
-        }
-
-        qb.groupBy('c.id')
+            .where('t.type = :type', { type: 'expense' })
+            .andWhere('t.date >= :startDate', { startDate })
+            .andWhere('t.date <= :endDate', { endDate })
+            .groupBy('c.id')
             .addGroupBy('c.name')
             .orderBy('SUM(t.amount)', 'DESC')
             .limit(5);
 
         const result = await qb.getRawMany();
         return result;
+    }
+
+
+    private getDateRange(dateFrom?: string, dateTo?: string) {
+        let startDate = dateFrom;
+        let endDate = dateTo;
+        if (!startDate && !endDate) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            startDate = new Date(year, month, 1).toISOString().split('T')[0];
+            endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+        } else if (startDate && !endDate) {
+            endDate = startDate;
+        } else if (!startDate && endDate) {
+            startDate = endDate;
+        }
+        return { startDate, endDate };
     }
 }
