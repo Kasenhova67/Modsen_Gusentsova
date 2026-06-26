@@ -17,7 +17,56 @@ export class StatisticsService{
     ){}
 
     async getCategoryReport(query: CategoryReportDto) {
-       
+        const { dateFrom, dateTo, type } = query;
+        const { startDate, endDate } = this.getDateRange(dateFrom, dateTo);
+        const isAll = !type || type === 'all';
+        const qb = this.categoryRepo
+            .createQueryBuilder('c')
+            .leftJoin('c.transactions', 't')
+            .select('c.id', 'categoryId')
+            .addSelect('c.name', 'categoryName')
+            .where('t.date >= :startDate', { startDate })
+            .andWhere('t.date <= :endDate', { endDate })
+            .groupBy('c.id')
+            .addGroupBy('c.name');
+
+        if(isAll){
+            qb.addSelect('SUM(CASE WHEN type.type = :incomeType THEN t.amount ELSE 0 END)', 'income')
+            .addSelect('SUM(CASE WHEN t.type = :expenseType THEN t.amount ELSE 0 END', 'expense')
+            .setParameter('incomeType','income')
+            .setParameter('expenseType', 'expense');
+        }else{
+            qb.addSelect('SUM(t.amount)', 'amount')
+            .andWhere('t.type = :type', { type }); 
+        }
+
+        const result = await qb.getRawMany();
+
+        if(isAll){
+            let totalIncome = 0;
+            let totalExpense = 0;
+            
+            for( const item of result ){
+                totalIncome += Number(item.income);
+                totalExpense += Number(item.expense);
+            };
+            let total = totalExpense + totalIncome;
+            return {
+                totalIncome,
+                totalExpense,
+                total,
+                categories:result,
+            };
+        } else{
+            let total = 0;
+            for(const item of result){
+                total+= Number(item.amount);
+            };
+            return{
+                [type]: total,
+                categories:result.map(item => ({categoryId: item.categoryId, categoryName: item.categoryName, amount: Number(item.amount),})),
+            }
+        }    
     }
 
     async getMonthlyTrend(query: MonthlyTrendDto) {
@@ -42,7 +91,7 @@ export class StatisticsService{
             .limit(5);
 
         const result = await qb.getRawMany();
-        return result;
+        return 
     }
 
 
