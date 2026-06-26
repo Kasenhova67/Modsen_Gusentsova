@@ -1,6 +1,7 @@
-import { BaseStatisticsDto } from "./base-statistics.dto";
-import { IsOptional,IsIn } from 'class-validator';
+import { BaseStatisticsDto } from './base-statistics.dto';
+import { IsOptional, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CategoryReportDto extends BaseStatisticsDto {
  @ApiPropertyOptional({
@@ -10,5 +11,6 @@ export class CategoryReportDto extends BaseStatisticsDto {
   })
   @IsOptional()
   @IsIn(['expense', 'income', 'all'])
-  type?: 'expense' | 'income' | 'all' = 'all'; 
+  @Transform(({ value }) => value ?? 'all')
+  type?: 'expense' | 'income' | 'all' = 'all';
 }
