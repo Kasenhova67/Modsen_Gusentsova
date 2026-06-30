@@ -14,20 +14,26 @@ import { Transaction } from './transactions/transaction.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => {
-        const url = config.get('DATABASE_URL');
-
+        const url = config.get<string>('DATABASE_URL');
+        if (url) {
+          return {
+            type: 'postgres',
+            url: url,
+            entities: [Category, Transaction],
+            synchronize: true,
+            ssl: { rejectUnauthorized: false },
+          };
+        }
         return {
           type: 'postgres',
-          ...(url ? { url } : {
-            host: config.get('DB_HOST'),
-            port: parseInt(config.get('DB_PORT'), 10),
-            username: config.get('DB_USER'),
-            password: config.get('DB_PASSWORD'),
-            database: config.get('DB_NAME'),
-          }),
+          host: config.get<string>('DB_HOST'),
+          port: config.get<number>('DB_PORT'),
+          username: config.get<string>('DB_USER'),
+          password: config.get<string>('DB_PASSWORD'),
+          database: config.get<string>('DB_NAME'),
           entities: [Category, Transaction],
           synchronize: true,
-          ssl: url ? { rejectUnauthorized: false } : false,
+          ssl: false,
         };
       },
       inject: [ConfigService],
