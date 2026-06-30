@@ -25,7 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm install -g @railway/cli
-      - name: Deploy to Railway
-        run: railway up --project 424e5749-e613-4052-aa08-54d0c25c4037
+      - run: railway up --project 424e5749-e613-4052-aa08-54d0c25c4037 --environment production
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
