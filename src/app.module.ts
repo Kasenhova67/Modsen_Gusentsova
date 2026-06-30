@@ -22,7 +22,7 @@ import {StatisticsModule} from './statistics/statistics.module';
         database: config.get('DB_NAME'),
         entities: [Category, Transaction],
         synchronize: config.get('NODE_ENV') !== 'production',
-        ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: true } : false,
+        ssl: config.get('SSL_ENABLED') === 'true' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),
