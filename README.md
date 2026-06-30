@@ -1,31 +1,95 @@
-## 📊 Вариант 2 — Статистика и отчёты
+# Expense Tracker API
 
-| Задача | Что нужно сделать |
-|--------|-------------------|
-| **Отчёт по категориям** | Эндпоинт разбивки расходов и доходов по категориям за период. Фильтр по типу записи: только расходы, только доходы или все вместе. |
-| **Динамика по месяцам** | Эндпоинт сумм расходов и доходов по каждому месяцу за последние 6 месяцев включая текущий. В ответе — все 6 месяцев подряд; если в месяце не было записей, суммы равны нулю (месяц не пропускается). |
-| **Топ категорий** | Эндпоинт топ-5 категорий по сумме расходов за выбранный период. |
-### Нефункциональные требования
-* Модуль оформлен отдельным NestJS-модулем и не ломает базовый функционал Part 1 (категории, записи, сводка).
-* В репозитории указаны назначенный вариант и сценарии проверки модуля из 5 шагов.
+RESTful API для учёта доходов и расходов. Реализовано на **NestJS**, **TypeORM**, **PostgreSQL**.
 
-### Сценарий проверки модуля (5 шагов)
+**Публичный URL:**  
+[https://modsengusentsova-production.up.railway.app](https://modsengusentsova-production.up.railway.app)
 
-1. **Создание тестовых данных**  
-   Создать категорию с названием "Monthly Test". Добавить транзакции за февраль–июнь 2026 года (доходы и расходы) для проверки всех отчётов.
+**Swagger документация:**  
+[https://modsengusentsova-production.up.railway.app/api/docs](https://modsengusentsova-production.up.railway.app/api/docs)
 
-2. **Проверка отчёта по категориям**  
-   `GET /statistics/categories?dateFrom=2025-01-01&dateTo=2026-06-26&type=all`  
-   Ожидаемый результат: доходы и расходы по категориям за указанный период.
+---
 
-3. **Проверка фильтра по типу**  
-   `GET /statistics/categories?dateFrom=2025-01-01&dateTo=2026-06-26`  
-   Ожидаемый результат: только расходы по категориям.
+## Технологический стек для Варианта 2
 
-4. **Проверка динамики по месяцам**  
-   `GET /statistics/monthly`  
-   Ожидаемый результат: 6 месяцев подряд с суммами доходов и расходов. Пустые месяцы — с нулями.
+- **NestJS** 
+- **TypeScript** 
+- **TypeORM** 
+- **PostgreSQL** 
+- **Docker** 
+- **Railway** 
+- **Swagger** 
+- **class-validator** 
+- **class-transformer** 
 
-5. **Проверка топ-5 категорий**  
-   `GET /statistics/top?dateFrom=2024-01-01&dateTo=2026-06-26`  
-   Ожидаемый результат: 5 категорий с наибольшей суммой расходов.
+---
+
+##  Функциональность для Варианта 2
+
+### Part 1 — Основной функционал
+
+#### Категории (Categories)
+- `POST /categories` — создать категорию
+- `GET /categories` — получить все категории (пагинация, поиск, сортировка)
+- `GET /categories/:id` — получить категорию по ID
+- `PATCH /categories/:id` — обновить категорию
+- `DELETE /categories/:id` — удалить категорию (с проверкой 409 Conflict)
+
+#### Транзакции (Transactions)
+- `POST /transactions` — создать транзакцию
+- `GET /transactions` — получить все транзакции (пагинация, фильтрация, поиск, сортировка)
+- `GET /transactions/:id` — получить транзакцию по ID
+- `PATCH /transactions/:id` — обновить транзакцию
+- `DELETE /transactions/:id` — удалить транзакцию
+
+#### Сводка (Summary)
+- `GET /summary` — сводка доходов, расходов и баланса за период
+
+---
+
+### Part 2 — Статистика и отчёты
+
+- `GET /statistics/categories` — отчёт по категориям (фильтр по типу: all / expense / income)
+- `GET /statistics/monthly` — динамика по месяцам (последние 6 месяцев)
+- `GET /statistics/top` — топ-5 категорий по расходам
+
+---
+
+## Быстрые ссылки для проверки
+
+### Категории
+
+| Что проверяем | Ссылка |
+|---------------|--------|
+| Все категории | [`/categories`](https://modsengusentsova-production.up.railway.app/categories) |
+| Пагинация (стр. 2, 5 записей) | [`/categories?page=2&limit=5`](https://modsengusentsova-production.up.railway.app/categories?page=2&limit=5) |
+| Поиск по названию | [`/categories?search=Food`](https://modsengusentsova-production.up.railway.app/categories?search=Food) |
+| Сортировка (А → Я) | [`/categories?sortBy=name&sortOrder=ASC`](https://modsengusentsova-production.up.railway.app/categories?sortBy=name&sortOrder=ASC) |
+| Сортировка (Я → А) | [`/categories?sortBy=name&sortOrder=DESC`](https://modsengusentsova-production.up.railway.app/categories?sortBy=name&sortOrder=DESC) |
+| Сортировка по дате | [`/categories?sortBy=createdAt&sortOrder=DESC`](https://modsengusentsova-production.up.railway.app/categories?sortBy=createdAt&sortOrder=DESC) |
+
+### Транзакции
+
+| Что проверяем | Ссылка |
+|---------------|--------|
+| Все транзакции | [`/transactions`](https://modsengusentsova-production.up.railway.app/transactions) |
+| Пагинация (стр. 2, 5 записей) | [`/transactions?page=2&limit=5`](https://modsengusentsova-production.up.railway.app/transactions?page=2&limit=5) |
+| Фильтр по типу (расходы) | [`/transactions?type=expense`](https://modsengusentsova-production.up.railway.app/transactions?type=expense) |
+| Фильтр по типу (доходы) | [`/transactions?type=income`](https://modsengusentsova-production.up.railway.app/transactions?type=income) |
+| Фильтр по периоду | [`/transactions?dateFrom=2025-01-01&dateTo=2025-12-31`](https://modsengusentsova-production.up.railway.app/transactions?dateFrom=2025-01-01&dateTo=2025-12-31) |
+| Поиск по описанию | [`/transactions?search=bill`](https://modsengusentsova-production.up.railway.app/transactions?search=bill) |
+| Сортировка по сумме (↓) | [`/transactions?sortBy=amount&sortOrder=DESC`](https://modsengusentsova-production.up.railway.app/transactions?sortBy=amount&sortOrder=DESC) |
+| Сортировка по сумме (↑) | [`/transactions?sortBy=amount&sortOrder=ASC`](https://modsengusentsova-production.up.railway.app/transactions?sortBy=amount&sortOrder=ASC) |
+
+### Сводка и статистика
+
+| Что проверяем | Ссылка |
+|---------------|--------|
+| Сводка за 2025 год | [`/summary?dateFrom=2025-01-01&dateTo=2025-12-31`](https://modsengusentsova-production.up.railway.app/summary?dateFrom=2025-01-01&dateTo=2025-12-31) |
+| Сводка за текущий месяц | [`/summary`](https://modsengusentsova-production.up.railway.app/summary) |
+| Отчёт по категориям | [`/statistics/categories?dateFrom=2025-01-01&dateTo=2025-12-31&type=all`](https://modsengusentsova-production.up.railway.app/statistics/categories?dateFrom=2025-01-01&dateTo=2025-12-31&type=all) |
+| Динамика по месяцам | [`/statistics/monthly`](https://modsengusentsova-production.up.railway.app/statistics/monthly) |
+| Топ-5 категорий | [`/statistics/top?dateFrom=2025-01-01&dateTo=2025-12-31`](https://modsengusentsova-production.up.railway.app/statistics/top?dateFrom=2025-01-01&dateTo=2025-12-31) |
+
+---
+
