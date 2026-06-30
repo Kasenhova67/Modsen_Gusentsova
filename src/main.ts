@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { SWAGGER_TITLE, SWAGGER_DESCRIPTION, SWAGGER_VERSION, SWAGGER_PATH, PORT } from './constants';
+import { SWAGGER_TITLE, SWAGGER_DESCRIPTION, SWAGGER_VERSION, SWAGGER_PATH } from './constants';
 import { AllExceptionsFilter } from './common/error/error';
 
 async function bootstrap() {
@@ -17,9 +17,10 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(SWAGGER_PATH, app, document);
-
-  await app.listen(PORT);
-  console.log(`Server on http://localhost:${PORT}`);
-  console.log(`Swagger on http://localhost:${PORT}/${SWAGGER_PATH}`);
+  
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Server on http://localhost:${port}`);
+  console.log(`Swagger on http://localhost:${port}/${SWAGGER_PATH}`);
 }
 bootstrap();
