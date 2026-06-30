@@ -6,6 +6,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { Category } from './categories/category.entity';
 import { Transaction } from './transactions/transaction.entity';
 import { SummaryModule } from './summary/summary.module';
+import {StatisticsModule} from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -21,13 +22,14 @@ import { SummaryModule } from './summary/summary.module';
         database: config.get('DB_NAME'),
         entities: [Category, Transaction],
         synchronize: config.get('NODE_ENV') !== 'production',
-        ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: true } : false,
+        ssl: config.get('SSL_ENABLED') === 'true' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),
     CategoriesModule,
     TransactionsModule,
     SummaryModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}
