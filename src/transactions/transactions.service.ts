@@ -42,27 +42,21 @@ export class TransactionsService {
 
   async findAll(query: QueryTransactionDto) {
     const { page, limit, type, categoryId, dateFrom, dateTo, search, sortBy, sortOrder } = query;
+    const qb = this.transactionRepository.createQueryBuilder('t');
 
-    let transactions = await this.transactionRepository.find();
+    if (type) qb.andWhere('t.type = :type', { type });
+    if (categoryId) qb.andWhere('t.categoryId = :categoryId', { categoryId });
+    if (dateFrom) qb.andWhere('t.date >= :dateFrom', { dateFrom });
+    if (dateTo) qb.andWhere('t.date <= :dateTo', { dateTo });
+    if (search) qb.andWhere('t.description ILIKE :search', { search: `%${search}%` });
 
-    if (type) {
-      transactions = transactions.filter(t => t.type === type);
-    }
-    if (categoryId) {
-      transactions = transactions.filter(t => t.categoryId === categoryId);
-    }
-    if (dateFrom) {
-      transactions = transactions.filter(t => t.date >= dateFrom);
-    }
-    if (dateTo) {
-      transactions = transactions.filter(t => t.date <= dateTo);
-    }
-    if (search) {
-      transactions = filterBySearch(transactions, search, t => t.description);
-    }
+    const sortField = sortBy === 'amount' ? 't.amount' : 't.date';
+    qb.orderBy(sortField, sortOrder);
+    qb.skip((page - 1) * limit).take(limit);
 
-    const sorted = sortByField(transactions, sortBy as keyof Transaction, sortOrder);
-    return paginate(sorted, page, limit);
+    const [data, total] = await qb.getManyAndCount();
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findOne(id: string) {
