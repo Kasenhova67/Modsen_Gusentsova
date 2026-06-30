@@ -20,7 +20,7 @@ import { Transaction } from './transactions/transaction.entity';
             type: 'postgres',
             url: url,
             entities: [Category, Transaction],
-            synchronize: true,
+            synchronize: process.env.NODE_ENV !== 'production',
             ssl: { rejectUnauthorized: false },
           };
         }
