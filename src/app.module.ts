@@ -1,29 +1,35 @@
- import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { SummaryModule } from './summary/summary.module';
+import { StatisticsModule } from './statistics/statistics.module';
 import { Category } from './categories/category.entity';
 import { Transaction } from './transactions/transaction.entity';
-import { SummaryModule } from './summary/summary.module';
-import {StatisticsModule} from './statistics/statistics.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DB_HOST'),
-        port: config.get('DB_PORT'),
-        username: config.get('DB_USER'),
-        password: config.get('DB_PASSWORD'),
-        database: config.get('DB_NAME'),
-        entities: [Category, Transaction],
-        synchronize: config.get('NODE_ENV') !== 'production',
-        ssl: config.get('SSL_ENABLED') === 'true' ? { rejectUnauthorized: false } : false,
-      }),
+      useFactory: (config: ConfigService) => {
+        const url = config.get('DATABASE_URL');
+
+        return {
+          type: 'postgres',
+          ...(url ? { url } : {
+            host: config.get('DB_HOST'),
+            port: parseInt(config.get('DB_PORT'), 10),
+            username: config.get('DB_USER'),
+            password: config.get('DB_PASSWORD'),
+            database: config.get('DB_NAME'),
+          }),
+          entities: [Category, Transaction],
+          synchronize: true,
+          ssl: url ? { rejectUnauthorized: false } : false,
+        };
+      },
       inject: [ConfigService],
     }),
     CategoriesModule,
