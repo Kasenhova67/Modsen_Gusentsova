@@ -11,3 +11,4 @@ import { Category } from '../categories/category.entity';
     providers: [StatisticsService],
 })
 export class StatisticsModule {}
+

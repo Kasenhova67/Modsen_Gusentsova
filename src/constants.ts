@@ -22,3 +22,4 @@ export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 export const ERROR_STATISTICS_NO_DATA = 'No data found for the specified period';
 export const ERROR_STATISTICS_INVALID_DATE = 'Invalid date format. Use YYYY-MM-DD';
 export const ERROR_STATISTICS_INVALID_TYPE = 'Type must be expense, income, or all';
+

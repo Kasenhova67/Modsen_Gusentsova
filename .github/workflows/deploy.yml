@@ -28,3 +28,4 @@ jobs:
       - run: railway up --project 424e5749-e613-4052-aa08-54d0c25c4037 --environment production --service 56377663-186d-4192-b6b5-ea5fd07f26a2
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
